@@ -1,21 +1,17 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"github.com/zain2323/cronium/internal/database"
+	"github.com/zain2323/cronium/config"
+	"github.com/zain2323/cronium/handlers"
 	"log"
 	"net/http"
 	"os"
 )
-
-type apiConfig struct {
-	DB *database.Queries
-}
 
 func main() {
 	godotenv.Load(".env")
@@ -29,21 +25,21 @@ func main() {
 		log.Fatal("Please configure DB_URL in the environment")
 	}
 
-	conn, err := sql.Open("postgres", dbUrl)
+	apiCfg, err := config.New(dbUrl)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to initialize API config:", err)
 	}
 
-	apiCfg := apiConfig{
-		DB: database.New(conn),
-	}
-	fmt.Println(apiCfg)
+	handler := &handlers.UserHandler{Config: apiCfg}
 
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World\n"))
+
+	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Ok\n"))
 	})
+
+	router.Post("/users", handler.CreateUser)
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: router,

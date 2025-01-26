@@ -1,0 +1,15 @@
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "FirstName": "Zain",
+  "LastName": "Siddiqui",
+  "Email": "zain@email.com",
+  "phone": "030300"
+}
+
+###
+### GET request to example server
+GET http://localhost:8080/health
+
+###

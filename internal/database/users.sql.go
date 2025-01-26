@@ -7,7 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,10 +19,10 @@ VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, first_name, last_name, email, 
 
 type CreateUserParams struct {
 	ID        uuid.UUID
-	FirstName sql.NullString
-	LastName  sql.NullString
-	Email     sql.NullString
-	Phone     sql.NullString
+	FirstName string
+	LastName  string
+	Email     string
+	Phone     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
