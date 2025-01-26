@@ -3,12 +3,14 @@
 //   sqlc v1.27.0
 // source: users.sql
 
-package main
+package database
 
 import (
 	"context"
+	"database/sql"
+	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -17,17 +19,17 @@ VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, first_name, last_name, email, 
 `
 
 type CreateUserParams struct {
-	ID        pgtype.UUID
-	FirstName pgtype.Text
-	LastName  pgtype.Text
-	Email     pgtype.Text
-	Phone     pgtype.Text
-	CreatedAt pgtype.Timestamp
-	UpdatedAt pgtype.Timestamp
+	ID        uuid.UUID
+	FirstName sql.NullString
+	LastName  sql.NullString
+	Email     sql.NullString
+	Phone     sql.NullString
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser,
+	row := q.db.QueryRowContext(ctx, createUser,
 		arg.ID,
 		arg.FirstName,
 		arg.LastName,
@@ -53,8 +55,8 @@ const getUserByID = `-- name: GetUserByID :one
 SELECT id, first_name, last_name, email, phone, created_at, updated_at FROM users WHERE id = $1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByID, id)
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
 		&i.ID,

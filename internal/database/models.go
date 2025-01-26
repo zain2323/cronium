@@ -2,18 +2,21 @@
 // versions:
 //   sqlc v1.27.0
 
-package main
+package database
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID        pgtype.UUID
-	FirstName pgtype.Text
-	LastName  pgtype.Text
-	Email     pgtype.Text
-	Phone     pgtype.Text
-	CreatedAt pgtype.Timestamp
-	UpdatedAt pgtype.Timestamp
+	ID        uuid.UUID
+	FirstName sql.NullString
+	LastName  sql.NullString
+	Email     sql.NullString
+	Phone     sql.NullString
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
