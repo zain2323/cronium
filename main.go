@@ -14,7 +14,10 @@ import (
 )
 
 func main() {
-	godotenv.Load(".env")
+	err := godotenv.Load(".env")
+	if err != nil {
+		return
+	}
 	port := os.Getenv("PORT")
 	dbUrl := os.Getenv("DB_URL")
 	if port == "" {
@@ -38,8 +41,10 @@ func main() {
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Ok\n"))
 	})
-
 	router.Post("/users", handler.CreateUser)
+
+	router.Mount("/v1/api", router)
+
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: router,

@@ -1,4 +1,4 @@
-POST http://localhost:8080/users
+POST http://localhost:8080/v1/api/users
 Content-Type: application/json
 
 {
@@ -10,6 +10,6 @@ Content-Type: application/json
 
 ###
 ### GET request to example server
-GET http://localhost:8080/health
+GET http://localhost:8080/v1/api/health
 
 ###
