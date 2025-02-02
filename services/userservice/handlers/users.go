@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"github.com/google/uuid"
-	"github.com/zain2323/cronium/config"
-	"github.com/zain2323/cronium/data"
-	"github.com/zain2323/cronium/internal/database"
+	"github.com/zain2323/cronium/services/data"
+	"github.com/zain2323/cronium/services/userservice/config"
+	"github.com/zain2323/cronium/services/userservice/internal/database"
 	"log"
 	"net/http"
 	"time"

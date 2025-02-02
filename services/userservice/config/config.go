@@ -2,7 +2,7 @@ package config
 
 import (
 	"database/sql"
-	"github.com/zain2323/cronium/internal/database"
+	"github.com/zain2323/cronium/services/internal/database"
 	"log"
 )
 
