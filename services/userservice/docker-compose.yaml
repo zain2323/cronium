@@ -1,0 +1,30 @@
+services:
+
+  user-service-db:
+    image: postgres:latest
+    container_name: user-service-db
+    restart: always
+    environment:
+      POSTGRES_USER: user-service-user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user-service-db
+    volumes:
+      - user-service-data:/var/lib/postgresql/data
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-service
+    depends_on:
+      - user-service-db
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "8081:8081"
+    volumes:
+      - .env:/app/.env
+
+volumes:
+  user-service-data:

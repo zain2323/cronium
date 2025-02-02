@@ -15,14 +15,15 @@ import (
 )
 
 func main() {
-	err := godotenv.Load(".env")
+	err := godotenv.Load()
 	if err != nil {
+		log.Fatal(err)
 		return
 	}
 	port := os.Getenv("PORT")
 	dbUrl := os.Getenv("DB_URL")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 		log.Printf("Defaulting to port %s", port)
 	}
 	if dbUrl == "" {
@@ -58,10 +59,10 @@ func main() {
 	router.Mount("/v1/api", router)
 
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: router,
 	}
-	fmt.Printf("Listening on port %s .....\n", port)
+	fmt.Printf("Starting user service on port %s .....\n", port)
 	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
