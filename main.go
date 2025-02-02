@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/zain2323/cronium/config"
@@ -36,6 +37,17 @@ func main() {
 	handler := &handlers.UserHandler{Config: apiCfg}
 
 	router := chi.NewRouter()
+
+	// cors setup
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300,
+	}))
+
 	router.Use(middleware.Logger)
 
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
