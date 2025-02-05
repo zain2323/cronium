@@ -15,9 +15,10 @@ import (
 )
 
 func main() {
+	logger := log.New(os.Stdout, "users-api", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return
 	}
 	port := os.Getenv("PORT")
@@ -32,10 +33,10 @@ func main() {
 
 	apiCfg, err := config.New(dbUrl)
 	if err != nil {
-		log.Fatal("Failed to initialize API config:", err)
+		logger.Fatal("Failed to initialize API config:", err)
 	}
 
-	handler := &handlers.UserHandler{Config: apiCfg}
+	userHandler := handlers.NewUser(apiCfg, logger)
 
 	router := chi.NewRouter()
 
@@ -54,13 +55,15 @@ func main() {
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Ok\n"))
 	})
-	router.Post("/users", handler.CreateUser)
+	router.Post("/users", userHandler.CreateUser)
+	router.Post("/users/login", userHandler.Login)
 
-	router.Mount("/v1/api", router)
+	router.Mount("/api/v1", router)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", port),
-		Handler: router,
+		Addr:     fmt.Sprintf(":%s", port),
+		Handler:  router,
+		ErrorLog: logger,
 	}
 	fmt.Printf("Starting user service on port %s .....\n", port)
 	err = server.ListenAndServe()

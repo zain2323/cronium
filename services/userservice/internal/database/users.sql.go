@@ -13,8 +13,9 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, first_name, last_name, email, phone, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, first_name, last_name, email, phone, created_at, updated_at
+INSERT INTO users (id, first_name, last_name, email, phone, password, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING id, first_name, last_name, email, phone, created_at, updated_at, password
 `
 
 type CreateUserParams struct {
@@ -23,6 +24,7 @@ type CreateUserParams struct {
 	LastName  string
 	Email     string
 	Phone     string
+	Password  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -34,6 +36,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.LastName,
 		arg.Email,
 		arg.Phone,
+		arg.Password,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -46,12 +49,37 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Phone,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Password,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, first_name, last_name, email, phone, created_at, updated_at, password
+FROM users
+WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.FirstName,
+		&i.LastName,
+		&i.Email,
+		&i.Phone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Password,
 	)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, first_name, last_name, email, phone, created_at, updated_at FROM users WHERE id = $1
+SELECT id, first_name, last_name, email, phone, created_at, updated_at, password
+FROM users
+WHERE id = $1
 `
 
 func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -65,6 +93,23 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Phone,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Password,
 	)
 	return i, err
+}
+
+const setUserPassword = `-- name: SetUserPassword :exec
+UPDATE users
+SET password = $2
+WHERE id = $1
+`
+
+type SetUserPasswordParams struct {
+	ID       uuid.UUID
+	Password string
+}
+
+func (q *Queries) SetUserPassword(ctx context.Context, arg SetUserPasswordParams) error {
+	_, err := q.db.ExecContext(ctx, setUserPassword, arg.ID, arg.Password)
+	return err
 }

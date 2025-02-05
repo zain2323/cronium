@@ -18,4 +18,5 @@ type User struct {
 	Phone     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Password  string
 }

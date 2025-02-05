@@ -1,15 +1,25 @@
-POST http://localhost:8081/v1/api/users
+POST http://localhost:8081/api/v1/users/login
+Content-Type: application/json
+
+{
+  "Email": "zain2@email.com",
+  "Password": "234"
+}
+
+### for registration
+POST http://localhost:8081/api/v1/users
 Content-Type: application/json
 
 {
   "FirstName": "Zain",
   "LastName": "Siddiqui",
-  "Email": "zain@email.com",
-  "phone": "030300"
+  "Email": "zain2@email.com",
+  "phone": "030301210",
+  "Password": "234"
 }
 
 ###
-### GET request to example server
-GET http://localhost:8081/v1/api/health
+### GET request to check api status
+GET http://localhost:8081/api/v1/health
 
 ###
