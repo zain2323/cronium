@@ -18,8 +18,8 @@ var basePath = "./imagestore"
 func main() {
 	logger := log.New(os.Stdout, "files-api", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 
-	storage, storageErr := files.NewLocal(basePath, 1024*1000*5) // max file size is kept 5MB
-
+	//storage, storageErr := files.NewLocal(basePath, 1024*1000*5) // max file size is kept 5MB
+	storage, storageErr := files.NewS3Storage(1024 * 1000 * 5)
 	if storageErr != nil {
 		logger.Fatal(storageErr)
 		return
@@ -51,12 +51,10 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	fileServer := http.StripPrefix("/api/v1/upload/images/", http.FileServer(http.Dir(basePath)))
-
 	router.Use(middleware.Logger)
 
 	router.Post("/upload/images/{resourceId}/{filename}", fileHandler.Upload)
-	router.Get("/upload/images/{resourceId}/{filename}", fileServer.ServeHTTP)
+	router.Get("/upload/images/{resourceId}/{filename}", fileHandler.Download)
 
 	router.Mount("/api/v1", router)
 

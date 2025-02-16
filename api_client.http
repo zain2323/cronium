@@ -1,4 +1,4 @@
-POST http://localhost:8082/api/v1/upload/798578djshf/test.png
+POST http://localhost:8082/api/v1/upload/images/798578djshf/test.png
 Accept: application/json
 
 ###

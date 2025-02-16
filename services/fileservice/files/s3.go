@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -75,11 +76,22 @@ func (s *S3Storage) Save(objectName string, contents io.Reader) error {
 
 // Get reads the object from the bucket
 func (s *S3Storage) Get(objectName string) (*os.File, error) {
-	newFile, err := os.Create(objectName)
+	fp := s.fullPath(objectName)
+	// get the directory and make sure it exists
+	d := filepath.Dir(fp)
+	err := os.MkdirAll(d, os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
+	}
+
+	// create the new file
+	newFile, err := os.Create(fp)
+	if err != nil {
+		log.Println("sss")
+		log.Println(err)
 	}
 	defer newFile.Close()
+	log.Println("File retrieved successfully")
 
 	_, err = s.downloader.Download(context.TODO(), newFile, &s3.GetObjectInput{
 		Bucket: aws.String(AwsS3Bucket),
@@ -90,4 +102,9 @@ func (s *S3Storage) Get(objectName string) (*os.File, error) {
 		return nil, err
 	}
 	return newFile, nil
+}
+
+// returns the absolute path
+func (s *S3Storage) fullPath(path string) string {
+	return filepath.Join(s.bucketName, path)
 }
