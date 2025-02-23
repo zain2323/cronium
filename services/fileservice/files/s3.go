@@ -6,15 +6,18 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/joho/godotenv"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-const (
-	AwsS3Bucket = "cronium-file-service"
-	AwsS3Region = "us-east-2"
+var _ = godotenv.Load(".env")
+
+var (
+	AwsS3Bucket string
+	AwsS3Region string
 )
 
 // S3Storage S3 is an implementation of the Storage interface which works with the AWS S3
@@ -26,10 +29,21 @@ type S3Storage struct {
 	downloader  *manager.Downloader
 }
 
+func loadEnv() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	AwsS3Bucket = os.Getenv("AWS_S3_BUCKET")
+	AwsS3Region = os.Getenv("AWS_S3_REGION")
+}
+
 // createClient initializes the S3 client by using the AWS ACCESS_KEY and SECRET_KEY
 // configured through the AWS cli
 // TODO: replace it with env vars
 func createClient() (*s3.Client, error) {
+	loadEnv()
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(AwsS3Region))
 	if err != nil {
 		log.Println(err)
@@ -58,7 +72,6 @@ func NewS3Storage(maxSize int64) (*S3Storage, error) {
 
 // Save the contents of the writer as the object with the provided name
 func (s *S3Storage) Save(objectName string, contents io.Reader) error {
-
 	// Upload the file to S3
 	_, err := s.uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(AwsS3Bucket),
